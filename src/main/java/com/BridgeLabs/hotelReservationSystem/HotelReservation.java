@@ -39,9 +39,9 @@ public class HotelReservation {
 	}
 
 	/**
-	 * uc6
+	 * uc12
 	 */
-	public void getCheapestBestRatedHotel() {
+	public void getCheapestBestRatedHotelForRegular() {
 		Customer customer=getCustomerInput();
 		int numWeekdays=customer.getNumWeekdays();
 		int numWeekends=customer.getNumWeekends();
@@ -121,7 +121,7 @@ public class HotelReservation {
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.getCheapestBestRatedHotelForRewards();
+		hotelReservation.getCheapestBestRatedHotelForRegular();
 	}
 }
 
