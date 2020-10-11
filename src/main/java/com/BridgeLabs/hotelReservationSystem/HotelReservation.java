@@ -24,21 +24,21 @@ public class HotelReservation {
 	}
 
 	/**
-	 *uc5 
+	 * uc5
 	 */
 	public void addHotels() {
 		do {
-			logger.debug(
-					"Enter the hotel details in given order -\nName:\nRating:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:");
-			hotels.add(new Hotel(sc.nextLine(), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine())));
+			logger.debug("Enter the hotel details in given order -\nName:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:\nRating:");
+			hotels.add(new Hotel(sc.nextLine(), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine()),
+					Integer.parseInt(sc.nextLine())));
 			logger.debug("Enter 1 to add another hotel, else enter 0: ");
 		} while (sc.nextLine().equals("1"));
 	}
 
 	/**
-	 * uc4
+	 * uc6
 	 */
-	public void getCheapestHotel() {
+	public void getCheapestBestRatedHotel() {
 		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  16Mar2020(mon), 17Mar2020(tues), 18Mar2020(wed)");
 		String customerInput = sc.nextLine();
 		Matcher dayMatcher = DAY_PATTERN.matcher(customerInput);
@@ -50,15 +50,23 @@ public class HotelReservation {
 		int numWeekdays = daysList.size() - numWeekends;
 		Map<Hotel, Integer> hotelToTotalRateMap = hotels.stream().collect(Collectors.toMap(hotel -> hotel,
 				hotel -> hotel.getRegularWeekendRate() * numWeekends + hotel.getRegularWeekdayRate() * numWeekdays));
-		Hotel cheapestHotel = hotelToTotalRateMap.keySet().stream()
-				.min((n1, n2) -> hotelToTotalRateMap.get(n1) - hotelToTotalRateMap.get(n2)).orElse(null);
-		logger.debug(cheapestHotel.getName() + ", Total Rates: $" + hotelToTotalRateMap.get(cheapestHotel));
+		Hotel cheapestHotel = hotelToTotalRateMap.keySet().stream().min((hotel1, hotel2) -> {
+			int rateDifference = hotelToTotalRateMap.get(hotel1) - hotelToTotalRateMap.get(hotel2);
+			int ratingDifference = hotel1.getRating() - hotel2.getRating();
+			return rateDifference == 0 ? -(ratingDifference) : rateDifference;
+		}).orElse(null);
+		try {
+			logger.debug(cheapestHotel.getName() + ", Rating: " + cheapestHotel.getRating() + " and Total Rates: $"
+					+ hotelToTotalRateMap.get(cheapestHotel));
+		} catch (NullPointerException e) {
+			logger.debug("No hotel found");
+		}
 	}
 
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.hotels.forEach(hotel->logger.debug(hotel));
+		hotelReservation.getCheapestBestRatedHotel();
 	}
 }
 
@@ -67,7 +75,7 @@ class Hotel {
 	private int regularWeekdayRate;
 	private int regularWeekendRate;
 	private int rating;
-	
+
 	public Hotel(String name, int regularWeekdayRate, int regularWeekendRate, int rating) {
 		super();
 		this.name = name;
