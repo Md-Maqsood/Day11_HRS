@@ -24,13 +24,13 @@ public class HotelReservation {
 	}
 
 	/**
-	 * uc3
+	 *uc5 
 	 */
 	public void addHotels() {
 		do {
 			logger.debug(
-					"Enter the hotel details in given order -\nName:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:");
-			hotels.add(new Hotel(sc.nextLine(), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine())));
+					"Enter the hotel details in given order -\nName:\nRating:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:");
+			hotels.add(new Hotel(sc.nextLine(), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine())));
 			logger.debug("Enter 1 to add another hotel, else enter 0: ");
 		} while (sc.nextLine().equals("1"));
 	}
@@ -58,7 +58,7 @@ public class HotelReservation {
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.getCheapestHotel();
+		hotelReservation.hotels.forEach(hotel->logger.debug(hotel));
 	}
 }
 
@@ -66,12 +66,22 @@ class Hotel {
 	private String name;
 	private int regularWeekdayRate;
 	private int regularWeekendRate;
-
-	public Hotel(String name, int regularWeekdayRate, int regularWeekendRate) {
+	private int rating;
+	
+	public Hotel(String name, int regularWeekdayRate, int regularWeekendRate, int rating) {
 		super();
 		this.name = name;
 		this.regularWeekdayRate = regularWeekdayRate;
 		this.regularWeekendRate = regularWeekendRate;
+		this.rating = rating;
+	}
+
+	public int getRating() {
+		return rating;
+	}
+
+	public void setRating(int rating) {
+		this.rating = rating;
 	}
 
 	public String getName() {
@@ -101,7 +111,6 @@ class Hotel {
 	@Override
 	public String toString() {
 		return "Hotel [name=" + name + ", regularWeekdayRate=" + regularWeekdayRate + ", regularWeekendRate="
-				+ regularWeekendRate + "]";
+				+ regularWeekendRate + ", rating=" + rating + "]";
 	}
-
 }
