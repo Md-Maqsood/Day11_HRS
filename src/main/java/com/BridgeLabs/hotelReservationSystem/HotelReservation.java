@@ -1,5 +1,8 @@
 package com.BridgeLabs.hotelReservationSystem;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +19,8 @@ public class HotelReservation {
 	private static final Logger logger = LogManager.getLogger(HotelReservation.class);
 	static Scanner sc = new Scanner(System.in);
 	public List<Hotel> hotels;
-	private static final Pattern DAY_PATTERN = Pattern.compile("\\([a-z]{3,4}\\)");
-	private static final List<String> WEEKENDS = Arrays.asList(new String[] { "(sat)", "(sun)" });
+	private static final Pattern DAY_PATTERN = Pattern.compile("[0-9]{2}[A-Z][a-z]{2}[0-9]{4}");
+	private static final List<DayOfWeek> WEEKENDS = Arrays.asList(new DayOfWeek[] { DayOfWeek.SUNDAY, DayOfWeek.SATURDAY });
 
 	public HotelReservation() {
 		this.hotels = new ArrayList<Hotel>();
@@ -58,51 +61,40 @@ public class HotelReservation {
 	}
 	
 	/**
-	 * uc10
+	 * uc11
 	 */
 	public void getCheapestBestRatedHotelForRewards() {
 		Customer customer=getCustomerInput();
 		int numWeekdays=customer.getNumWeekdays();
 		int numWeekends=customer.getNumWeekends();
-		Hotel cheapestBestRatedHotel=null;
-		Integer minTotalRate=null;
-		for(Hotel hotel: hotels) {
-			Integer totalRate = hotel.getRewardsWeekdayRate() * numWeekdays
-					+ hotel.getRewardsWeekendRate() * numWeekends;
-			try {
-				if (minTotalRate.compareTo(totalRate) > 0) {
-					cheapestBestRatedHotel = hotel;
-					minTotalRate = totalRate;
-				} else if (minTotalRate.compareTo(totalRate) == 0) {
-					if (hotel.getRating() > cheapestBestRatedHotel.getRating()) {
-						cheapestBestRatedHotel = hotel;
-						minTotalRate = totalRate;
-					}
-				}
-			}catch (NullPointerException e) {
-				cheapestBestRatedHotel=hotel;
-				minTotalRate=totalRate;
-			}
-		}
+		Map<Hotel, Integer> hotelToTotalRateMap = hotels.stream().collect(Collectors.toMap(hotel -> hotel,
+				hotel -> hotel.getRewardsWeekendRate() * numWeekends + hotel.getRewardsWeekdayRate() * numWeekdays));
+		Hotel cheapestBestRatedHotel = hotelToTotalRateMap.keySet().stream().min((hotel1, hotel2) -> {
+			int rateDifference = hotelToTotalRateMap.get(hotel1) - hotelToTotalRateMap.get(hotel2);
+			int ratingDifference = hotel1.getRating() - hotel2.getRating();
+			return rateDifference == 0 ? -(ratingDifference) : rateDifference;
+		}).orElse(null);
 		try {
-			logger.debug(cheapestBestRatedHotel.getName() + ", Rating: "+cheapestBestRatedHotel.getRating()+" and Total Rates: $" + minTotalRate);
+			logger.debug(cheapestBestRatedHotel.getName() + ", Rating: " + cheapestBestRatedHotel.getRating() + " and Total Rates: $"
+					+ hotelToTotalRateMap.get(cheapestBestRatedHotel));
 		} catch (NullPointerException e) {
 			logger.debug("No hotel found");
 		}
 	}
 	
 	/**
-	 * uc10
+	 * uc11
 	 * Method takes date range input from customer and returns Customer object
 	 * @return
 	 */
 	public Customer getCustomerInput() {
-		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  16Mar2020(mon), 17Mar2020(tues), 18Mar2020(wed)");
+		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  09Mar2020, 10Mar2020, 11Mar2020");
 		String customerInput = sc.nextLine();
-		Matcher dayMatcher = DAY_PATTERN.matcher(customerInput);
-		List<String> daysList = new ArrayList<String>();
-		while (dayMatcher.find()) {
-			daysList.add(dayMatcher.group());
+		Matcher dateMatcher = DAY_PATTERN.matcher(customerInput);
+		DateTimeFormatter formatter=DateTimeFormatter.ofPattern("ddMMMuuuu");
+		List<DayOfWeek> daysList = new ArrayList<DayOfWeek>();
+		while (dateMatcher.find()) {
+			daysList.add(LocalDate.parse(dateMatcher.group(),formatter).getDayOfWeek());
 		}
 		int numWeekends = (int) daysList.stream().filter(day -> WEEKENDS.contains(day)).count();
 		return new Customer(daysList.size()-numWeekends, numWeekends);
