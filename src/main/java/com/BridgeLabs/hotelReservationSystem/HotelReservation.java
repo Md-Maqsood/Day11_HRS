@@ -24,13 +24,13 @@ public class HotelReservation {
 	}
 
 	/**
-	 * uc5
+	 * uc9
 	 */
 	public void addHotels() {
 		do {
-			logger.debug("Enter the hotel details in given order -\nName:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:\nRating:");
+			logger.debug("Enter the hotel details in given order -\nName:\nWeekday Rate for Regular Customer:\nWeekend Rate for Regular Customer:\nWeekday Rate for Rewards Customer:\nWeekend Rate for Rewards Customer:\nRating:");
 			hotels.add(new Hotel(sc.nextLine(), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine()),
-					Integer.parseInt(sc.nextLine())));
+					Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine()), Integer.parseInt(sc.nextLine())));
 			logger.debug("Enter 1 to add another hotel, else enter 0: ");
 		} while (sc.nextLine().equals("1"));
 	}
@@ -90,7 +90,7 @@ public class HotelReservation {
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.getBestRatedHotel();
+		hotelReservation.hotels.forEach(hotel->logger.debug(hotel));
 	}
 }
 
@@ -98,14 +98,35 @@ class Hotel {
 	private String name;
 	private int regularWeekdayRate;
 	private int regularWeekendRate;
+	private int rewardsWeekdayRate;
+	private int rewardsWeekendRate;
 	private int rating;
 
-	public Hotel(String name, int regularWeekdayRate, int regularWeekendRate, int rating) {
+	public Hotel(String name, int regularWeekdayRate, int regularWeekendRate, int rewardsWeekdayRate,
+			int rewardsWeekendRate, int rating) {
 		super();
 		this.name = name;
 		this.regularWeekdayRate = regularWeekdayRate;
 		this.regularWeekendRate = regularWeekendRate;
+		this.rewardsWeekdayRate = rewardsWeekdayRate;
+		this.rewardsWeekendRate = rewardsWeekendRate;
 		this.rating = rating;
+	}
+	
+	public int getRewardsWeekdayRate() {
+		return rewardsWeekdayRate;
+	}
+
+	public void setRewardsWeekdayRate(int rewardsWeekdayRate) {
+		this.rewardsWeekdayRate = rewardsWeekdayRate;
+	}
+
+	public int getRewardsWeekendRate() {
+		return rewardsWeekendRate;
+	}
+
+	public void setRewardsWeekendRate(int rewardsWeekendRate) {
+		this.rewardsWeekendRate = rewardsWeekendRate;
 	}
 
 	public int getRating() {
@@ -139,10 +160,11 @@ class Hotel {
 	public void setRegularWeekendRate(int regularWeekendRate) {
 		this.regularWeekendRate = regularWeekendRate;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Hotel [name=" + name + ", regularWeekdayRate=" + regularWeekdayRate + ", regularWeekendRate="
-				+ regularWeekendRate + ", rating=" + rating + "]";
+				+ regularWeekendRate + ", rewardsWeekdayRate=" + rewardsWeekdayRate + ", rewardsWeekendRate="
+				+ rewardsWeekendRate + ", rating=" + rating + "]";
 	}
 }
