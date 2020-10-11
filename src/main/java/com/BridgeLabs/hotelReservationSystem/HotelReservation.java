@@ -50,23 +50,47 @@ public class HotelReservation {
 		int numWeekdays = daysList.size() - numWeekends;
 		Map<Hotel, Integer> hotelToTotalRateMap = hotels.stream().collect(Collectors.toMap(hotel -> hotel,
 				hotel -> hotel.getRegularWeekendRate() * numWeekends + hotel.getRegularWeekdayRate() * numWeekdays));
-		Hotel cheapestHotel = hotelToTotalRateMap.keySet().stream().min((hotel1, hotel2) -> {
+		Hotel cheapestBestRatedHotel = hotelToTotalRateMap.keySet().stream().min((hotel1, hotel2) -> {
 			int rateDifference = hotelToTotalRateMap.get(hotel1) - hotelToTotalRateMap.get(hotel2);
 			int ratingDifference = hotel1.getRating() - hotel2.getRating();
 			return rateDifference == 0 ? -(ratingDifference) : rateDifference;
 		}).orElse(null);
 		try {
-			logger.debug(cheapestHotel.getName() + ", Rating: " + cheapestHotel.getRating() + " and Total Rates: $"
-					+ hotelToTotalRateMap.get(cheapestHotel));
+			logger.debug(cheapestBestRatedHotel.getName() + ", Rating: " + cheapestBestRatedHotel.getRating() + " and Total Rates: $"
+					+ hotelToTotalRateMap.get(cheapestBestRatedHotel));
 		} catch (NullPointerException e) {
 			logger.debug("No hotel found");
 		}
 	}
-
+	
+	/**
+	 * uc7
+	 */
+	public void getBestRatedHotel() {
+		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  16Mar2020(mon), 17Mar2020(tues), 18Mar2020(wed)");
+		String customerInput = sc.nextLine();
+		Matcher dayMatcher = DAY_PATTERN.matcher(customerInput);
+		List<String> daysList = new ArrayList<String>();
+		while (dayMatcher.find()) {
+			daysList.add(dayMatcher.group());
+		}
+		int numWeekends = (int) daysList.stream().filter(day -> WEEKENDS.contains(day)).count();
+		int numWeekdays = daysList.size() - numWeekends;
+		Hotel bestRatedHotel = hotels.stream().max((hotel1, hotel2) -> hotel1.getRating() - hotel2.getRating())
+				.orElse(null);
+		try {
+			int totalRate = bestRatedHotel.getRegularWeekdayRate() * numWeekdays
+					+ bestRatedHotel.getRegularWeekendRate() * numWeekends;
+			logger.debug(bestRatedHotel.getName() + " & Total Rates $" + totalRate);
+		} catch (NullPointerException e) {
+			logger.debug("No hotel found");
+		}
+	}
+	
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.getCheapestBestRatedHotel();
+		hotelReservation.getBestRatedHotel();
 	}
 }
 
