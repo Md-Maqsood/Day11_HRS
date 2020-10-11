@@ -72,7 +72,7 @@ public class HotelReservation {
 	}
 
 	public Customer getCustomerInput() {
-		logger.debug("Enter the date range in format <customer_type>:<date1>, <date2>, <date3>\nEg.:  Regular: 09Mar2020, 10Mar2020, 11Mar2020");
+		logger.debug("Enter the customer_type and date range in format <customer_type>:<date1>, <date2>, <date3>\nEg.:  Regular: 09Mar2020, 10Mar2020, 11Mar2020");
 		String customerInput = sc.nextLine();
 		Matcher customerTypeMatcher=CUSTOMER_TYPE_PATTERN.matcher(customerInput);
 		CustomerType customerType=CustomerType.REGULAR;
