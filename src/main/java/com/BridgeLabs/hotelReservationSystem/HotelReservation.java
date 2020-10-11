@@ -39,15 +39,9 @@ public class HotelReservation {
 	 * uc6
 	 */
 	public void getCheapestBestRatedHotel() {
-		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  16Mar2020(mon), 17Mar2020(tues), 18Mar2020(wed)");
-		String customerInput = sc.nextLine();
-		Matcher dayMatcher = DAY_PATTERN.matcher(customerInput);
-		List<String> daysList = new ArrayList<String>();
-		while (dayMatcher.find()) {
-			daysList.add(dayMatcher.group());
-		}
-		int numWeekends = (int) daysList.stream().filter(day -> WEEKENDS.contains(day)).count();
-		int numWeekdays = daysList.size() - numWeekends;
+		Customer customer=getCustomerInput();
+		int numWeekdays=customer.getNumWeekdays();
+		int numWeekends=customer.getNumWeekends();
 		Map<Hotel, Integer> hotelToTotalRateMap = hotels.stream().collect(Collectors.toMap(hotel -> hotel,
 				hotel -> hotel.getRegularWeekendRate() * numWeekends + hotel.getRegularWeekdayRate() * numWeekdays));
 		Hotel cheapestBestRatedHotel = hotelToTotalRateMap.keySet().stream().min((hotel1, hotel2) -> {
@@ -64,9 +58,45 @@ public class HotelReservation {
 	}
 	
 	/**
-	 * uc7
+	 * uc10
 	 */
-	public void getBestRatedHotel() {
+	public void getCheapestBestRatedHotelForRewards() {
+		Customer customer=getCustomerInput();
+		int numWeekdays=customer.getNumWeekdays();
+		int numWeekends=customer.getNumWeekends();
+		Hotel cheapestBestRatedHotel=null;
+		Integer minTotalRate=null;
+		for(Hotel hotel: hotels) {
+			Integer totalRate = hotel.getRewardsWeekdayRate() * numWeekdays
+					+ hotel.getRewardsWeekendRate() * numWeekends;
+			try {
+				if (minTotalRate.compareTo(totalRate) > 0) {
+					cheapestBestRatedHotel = hotel;
+					minTotalRate = totalRate;
+				} else if (minTotalRate.compareTo(totalRate) == 0) {
+					if (hotel.getRating() > cheapestBestRatedHotel.getRating()) {
+						cheapestBestRatedHotel = hotel;
+						minTotalRate = totalRate;
+					}
+				}
+			}catch (NullPointerException e) {
+				cheapestBestRatedHotel=hotel;
+				minTotalRate=totalRate;
+			}
+		}
+		try {
+			logger.debug(cheapestBestRatedHotel.getName() + ", Rating: "+cheapestBestRatedHotel.getRating()+" and Total Rates: $" + minTotalRate);
+		} catch (NullPointerException e) {
+			logger.debug("No hotel found");
+		}
+	}
+	
+	/**
+	 * uc10
+	 * Method takes date range input from customer and returns Customer object
+	 * @return
+	 */
+	public Customer getCustomerInput() {
 		logger.debug("Enter the date range in format <date1>, <date2>, <date3>\nEg.:  16Mar2020(mon), 17Mar2020(tues), 18Mar2020(wed)");
 		String customerInput = sc.nextLine();
 		Matcher dayMatcher = DAY_PATTERN.matcher(customerInput);
@@ -75,7 +105,16 @@ public class HotelReservation {
 			daysList.add(dayMatcher.group());
 		}
 		int numWeekends = (int) daysList.stream().filter(day -> WEEKENDS.contains(day)).count();
-		int numWeekdays = daysList.size() - numWeekends;
+		return new Customer(daysList.size()-numWeekends, numWeekends);
+	}
+	
+	/**
+	 * uc7
+	 */
+	public void getBestRatedHotel() {
+		Customer customer=getCustomerInput();
+		int numWeekdays=customer.getNumWeekdays();
+		int numWeekends=customer.getNumWeekends();
 		Hotel bestRatedHotel = hotels.stream().max((hotel1, hotel2) -> hotel1.getRating() - hotel2.getRating())
 				.orElse(null);
 		try {
@@ -90,8 +129,31 @@ public class HotelReservation {
 	public static void main(String[] args) {
 		HotelReservation hotelReservation = new HotelReservation();
 		hotelReservation.addHotels();
-		hotelReservation.hotels.forEach(hotel->logger.debug(hotel));
+		hotelReservation.getCheapestBestRatedHotelForRewards();
 	}
+}
+
+class Customer{
+	private int numWeekdays;
+	private int numWeekends;
+	public Customer(int numWeekdays, int numWeekends) {
+		super();
+		this.numWeekdays = numWeekdays;
+		this.numWeekends = numWeekends;
+	}
+	public int getNumWeekdays() {
+		return numWeekdays;
+	}
+	public void setNumWeekdays(int numWeekdays) {
+		this.numWeekdays = numWeekdays;
+	}
+	public int getNumWeekends() {
+		return numWeekends;
+	}
+	public void setNumWeekends(int numWeekends) {
+		this.numWeekends = numWeekends;
+	}
+	
 }
 
 class Hotel {
